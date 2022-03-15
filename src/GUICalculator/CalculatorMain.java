@@ -15,6 +15,9 @@ public class CalculatorMain
     //declare main window JFrame
     private static final JFrame calcWindow = new JFrame();
     private static final int FONT_SIZE = 20;
+    public static JTextField calcDisplay = new JTextField();
+    public static JRadioButton rd1 = new JRadioButton();
+    public static JRadioButton rd2 = new JRadioButton();
 
     //Create set containing the buttons
     private static final Map<String, JButton> buttons = initializeButtons("0", "1", "2", "3", "4",
@@ -67,6 +70,8 @@ public class CalculatorMain
             btn.setForeground(Color.DARK_GRAY);
             btn.setFont(new Font("Arial", Font.BOLD, FONT_SIZE));
             btn.setRolloverEnabled(true);
+            btn.setName(value);
+
             output.put(value, btn);
         }
         return output;
@@ -95,7 +100,8 @@ public class CalculatorMain
      * the buttons by adjusting the c.gridx or c.gridy to move around the grid.
      * Some components take up more than one cell, that's why sometimes the
      * gridWidth or gridHeight value is changed before adding a component and
-     * changed back to normal immediately after.
+     * changed back to normal immediately after. Also adds the event listeners
+     * to the buttons as they're added
      */
     public static void buildGUI()
     {
@@ -128,33 +134,35 @@ public class CalculatorMain
         c.gridwidth = 4;
 
         //Add the number display
-        var calcLabel = new JTextField("Hello World!");
-        calcLabel.setEditable(false);
-        calcLabel.setHorizontalAlignment(SwingConstants.RIGHT);
-        calcLabel.setFont(new Font("Arial", Font.BOLD, 30));
-        calcLabel.setMargin(new Insets(-8, 0, -8, 0));
+        calcDisplay.setText("Hey");
+        calcDisplay.setEditable(false);
+        calcDisplay.setHorizontalAlignment(SwingConstants.RIGHT);
+        calcDisplay.setFont(new Font("Arial", Font.BOLD, 30));
+        calcDisplay.setMargin(new Insets(-8, 0, -8, 0));
 
         //add to grid
-        calcPanel.add(calcLabel, c);
+        calcPanel.add(calcDisplay, c);
         c.gridwidth = 1;
 
         //Row 2
         c.gridy = 1;
         c.gridx = 0;
 
-        //Initialize mini grid of radio buttons then add to cell
+        //Initialize mini grid of radio buttons then add to cell, add event listeners
         JPanel radioButtons = new JPanel(new GridLayout(2,1));
         radioButtons.setBackground(Color.DARK_GRAY);
 
-        JRadioButton rd1 = new JRadioButton("on");
+        rd1.setText("on");
         rd1.setFont(new Font("Arial", Font.BOLD, 15));
         rd1.setForeground(Color.white);
         rd1.setSelected(true);
+        rd1.addActionListener(new btnRdOnClick());
         radioButtons.add(rd1);
 
-        JRadioButton rd2 = new JRadioButton("off");
+        rd2.setText("off");
         rd2.setFont(new Font("Arial", Font.BOLD, 15));
         rd2.setForeground(Color.white);
+        rd2.addActionListener(new btnRdOffClick());
         radioButtons.add(rd2);
 
         calcPanel.add(radioButtons, c);
@@ -162,56 +170,88 @@ public class CalculatorMain
         //Proceed with row
         c.gridx = 1;
         calcPanel.add(buttons.get("C"), c);
+        buttons.get("C").addActionListener(new btnACClick());
+
         c.gridx = 2;
         calcPanel.add(buttons.get("CE"), c);
+        buttons.get("CE").addActionListener(new btnCClick());
+
         c.gridx = 3;
         calcPanel.add(buttons.get("\u00F7"), c);
+        buttons.get("\u00F7").addActionListener(new btnDivideClick());
 
         //Row 3
         c.gridy = 2;
+
         c.gridx = 0;
         calcPanel.add(buttons.get("\u221A"), c);
+        buttons.get("\u221A").addActionListener(new btnSqrtClick());
+
         c.gridx = 1;
         calcPanel.add(buttons.get("x"+"\u00B2"), c);
+        buttons.get("x"+"\u00B2").addActionListener(new btnxSquareClick());
+
         c.gridx = 2;
         calcPanel.add(buttons.get("1/x"), c);
+        buttons.get("1/x").addActionListener(new btnRecipClick());
+
         c.gridx = 3;
         calcPanel.add(buttons.get("-"), c);
+        buttons.get("-").addActionListener(new btnMinusClick());
 
         //Row 4
         c.gridy = 3;
+
         c.gridx = 0;
         calcPanel.add(buttons.get("7"), c);
+        buttons.get("7").addActionListener(new btn7Click());
+
         c.gridx = 1;
         calcPanel.add(buttons.get("8"), c);
+        buttons.get("8").addActionListener(new btn8Click());
+
         c.gridx = 2;
         calcPanel.add(buttons.get("9"), c);
+        buttons.get("9").addActionListener(new btn9Click());
+
         c.gridx = 3;
         calcPanel.add(buttons.get("x"), c);
+        buttons.get("x").addActionListener(new btnMultiplyClick());
 
         //Row 5
         c.gridy = 4;
         c.gridx = 0;
         calcPanel.add(buttons.get("4"), c);
+        buttons.get("4").addActionListener(new btn4Click());
         c.gridx = 1;
         calcPanel.add(buttons.get("5"), c);
+        buttons.get("5").addActionListener(new btn5Click());
         c.gridx = 2;
         calcPanel.add(buttons.get("6"), c);
+        buttons.get("6").addActionListener(new btn6Click());
         c.gridx = 3;
         calcPanel.add(buttons.get("+"), c);
+        buttons.get("+").addActionListener(new btnAddClick());
 
         //Row 6
         c.gridy = 5;
 
         c.gridx = 0;
         calcPanel.add(buttons.get("1"), c);
+        buttons.get("1").addActionListener(new btn1Click());
+
         c.gridx = 1;
         calcPanel.add(buttons.get("2"), c);
+        buttons.get("2").addActionListener(new btn2Click());
+
         c.gridx = 2;
         calcPanel.add(buttons.get("3"), c);
+        buttons.get("3").addActionListener(new btn3Click());
+
         c.gridx = 3;
         c.gridheight = 2;
         calcPanel.add(buttons.get("="), c);
+        buttons.get("=").addActionListener(new btnEqualsClick());
         c.gridheight = 1;
 
         //Row 7
@@ -220,9 +260,12 @@ public class CalculatorMain
         c.gridx = 0;
         c.gridwidth = 2;
         calcPanel.add(buttons.get("0"), c);
+        buttons.get("0").addActionListener(new btn0Click());
+
         c.gridwidth = 1;
         c.gridx = 2;
         calcPanel.add(buttons.get("."), c);
+        buttons.get(".").addActionListener(new btnDecimalClick());
 
         //endregion
 
