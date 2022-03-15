@@ -15,7 +15,8 @@ public class CalculatorMain
     //declare main window JFrame
     private static final JFrame calcWindow = new JFrame();
     private static final int FONT_SIZE = 20;
-    public static JTextField calcDisplay = new JTextField();
+    private static final JTextField calcDisplay = new JTextField();
+    private static final JLabel prevNums = new JLabel("");
     public static JRadioButton rd1 = new JRadioButton();
     public static JRadioButton rd2 = new JRadioButton();
 
@@ -27,6 +28,59 @@ public class CalculatorMain
     {
         EventQueue.invokeLater(CalculatorMain::initializeWindow);
     }
+
+    //region CalcLabel methods
+    public static void addToDisplay(String text)
+    {
+        if(CalculatorFunction.displayingResult)
+            calcDisplay.setText("");
+            CalculatorFunction.displayingResult = false;
+
+        calcDisplay.setText(calcDisplay.getText() + text);
+    }
+    public static void setDisplayText(String text)
+    {
+        calcDisplay.setText(text);
+    }
+    public static void clearDisplayText()
+    {
+        calcDisplay.setText("");
+    }
+    public static String getDisplayText()
+    {
+        return calcDisplay.getText();
+    }
+    public static int getTextInt()
+    {
+        try
+        {
+            return Integer.parseInt(calcDisplay.getText());
+        }
+        catch (Exception e)
+        {
+            System.out.println("Parse error" + e);
+            return 1;
+        }
+    }
+    //endregion
+    //region prevCalcLabel methods
+    public static void setPreviousNumsLabel(String text)
+    {
+        prevNums.setText(text);
+    }
+    public static String getPreviousNums()
+    {
+        return prevNums.getText();
+    }
+    public static void addToPreviousNums(String text)
+    {
+        prevNums.setText(prevNums.getText()+text);
+    }
+    public static void clearPreviousNums()
+    {
+        prevNums.setText("");
+    }
+    //endregion
 
     /**
      * Helper method that determines the size of rows or columns.
@@ -47,6 +101,10 @@ public class CalculatorMain
         {
             if(rowsOrColumns.equalsIgnoreCase("rows"))
                 output[i] = (calcWindow.getHeight() / num);
+                if (i == 0)
+                    output[i] = output[i] / 2;
+                if (i == 1)
+                    output[i] = (int) (output[i] * 1.5);
             if(rowsOrColumns.equalsIgnoreCase("columns"))
                 output[i] = (calcWindow.getWidth() / num);
         }
@@ -85,7 +143,7 @@ public class CalculatorMain
     {
         //Set attributes for the window, then call the GUI builder
         calcWindow.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        calcWindow.setSize(300,500);
+        calcWindow.setSize(300,550);
         calcWindow.setResizable(false);
         calcWindow.setTitle("Calculator");
 
@@ -113,7 +171,7 @@ public class CalculatorMain
         calcPanel.setBackground(Color.DARK_GRAY);
 
         //Call helper method to evenly size rows and columns
-        gbl.rowHeights = distributeSizes(7, "rows");
+        gbl.rowHeights = distributeSizes(8, "rows");
         gbl.columnWidths = distributeSizes(4, "columns");
 
         calcPanel.setLayout(gbl);
@@ -128,24 +186,35 @@ public class CalculatorMain
         //endregion
 
         //region Drawing
+
         //Row 1
-        c.gridx = 0;
         c.gridy = 0;
+        c.gridx = 0;
         c.gridwidth = 4;
-
-        //Add the number display
-        calcDisplay.setText("Hey");
-        calcDisplay.setEditable(false);
-        calcDisplay.setHorizontalAlignment(SwingConstants.RIGHT);
-        calcDisplay.setFont(new Font("Arial", Font.BOLD, 30));
-        calcDisplay.setMargin(new Insets(-8, 0, -8, 0));
-
-        //add to grid
-        calcPanel.add(calcDisplay, c);
-        c.gridwidth = 1;
+        prevNums.setForeground(Color.white);
+        prevNums.setEnabled(false);
+        prevNums.setHorizontalAlignment(SwingConstants.RIGHT);
+        calcPanel.add(prevNums, c);
 
         //Row 2
         c.gridy = 1;
+        c.gridx = 0;
+        c.gridwidth = 4;
+
+        //Add the number display
+        calcDisplay.setEditable(false);
+        calcDisplay.setHorizontalAlignment(SwingConstants.RIGHT);
+        calcDisplay.setForeground(Color.DARK_GRAY);
+        calcDisplay.setFont(new Font("Arial", Font.BOLD, 30));
+        calcDisplay.setMargin(new Insets(-12, 0, -12, 0));
+
+        //add to grid
+        calcPanel.add(calcDisplay, c);
+
+        c.gridwidth = 1;
+
+        //Row 3
+        c.gridy = 2;
         c.gridx = 0;
 
         //Initialize mini grid of radio buttons then add to cell, add event listeners
@@ -180,8 +249,8 @@ public class CalculatorMain
         calcPanel.add(buttons.get("\u00F7"), c);
         buttons.get("\u00F7").addActionListener(new btnDivideClick());
 
-        //Row 3
-        c.gridy = 2;
+        //Row 4
+        c.gridy = 3;
 
         c.gridx = 0;
         calcPanel.add(buttons.get("\u221A"), c);
@@ -199,8 +268,8 @@ public class CalculatorMain
         calcPanel.add(buttons.get("-"), c);
         buttons.get("-").addActionListener(new btnMinusClick());
 
-        //Row 4
-        c.gridy = 3;
+        //Row 5
+        c.gridy = 4;
 
         c.gridx = 0;
         calcPanel.add(buttons.get("7"), c);
@@ -218,8 +287,8 @@ public class CalculatorMain
         calcPanel.add(buttons.get("x"), c);
         buttons.get("x").addActionListener(new btnMultiplyClick());
 
-        //Row 5
-        c.gridy = 4;
+        //Row 6
+        c.gridy = 5;
         c.gridx = 0;
         calcPanel.add(buttons.get("4"), c);
         buttons.get("4").addActionListener(new btn4Click());
@@ -233,8 +302,8 @@ public class CalculatorMain
         calcPanel.add(buttons.get("+"), c);
         buttons.get("+").addActionListener(new btnAddClick());
 
-        //Row 6
-        c.gridy = 5;
+        //Row 7
+        c.gridy = 6;
 
         c.gridx = 0;
         calcPanel.add(buttons.get("1"), c);
@@ -254,8 +323,8 @@ public class CalculatorMain
         buttons.get("=").addActionListener(new btnEqualsClick());
         c.gridheight = 1;
 
-        //Row 7
-        c.gridy = 6;
+        //Row 8
+        c.gridy = 7;
 
         c.gridx = 0;
         c.gridwidth = 2;
