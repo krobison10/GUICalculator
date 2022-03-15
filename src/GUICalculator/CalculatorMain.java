@@ -24,19 +24,24 @@ public class CalculatorMain
     {
         //Initialize the main calculator panel
         JPanel calcPanel = new JPanel();
-        calcPanel.setLayout(new GridBagLayout());
+        GridBagLayout gbl = new GridBagLayout();
+        gbl.rowHeights = distributeSizes(calcWindow, 7, "rows");
+        gbl.columnWidths = distributeSizes(calcWindow, 4, "columns");
+        calcPanel.setLayout(gbl);
         calcPanel.setBorder(new EmptyBorder(6, 6, 6, 6));
         calcPanel.setBackground(Color.DARK_GRAY);
 
         //Define set containing the buttons
-        Map<String, JButton> buttons = initializeButtons("0", "1", "2", "3", "4", "5", "6", "7", "8", "9",
-        "C", "DEL", "\u00F7", "-", "X", "+", "=", ".", "\u221A", ("x"+"\u00B2"), "1/x");
+        Map<String, JButton> buttons = initializeButtons("0", "1", "2", "3", "4", "5", "6", "7",
+        "8", "9", "C", "CE", "\u00F7", "-", "x", "+", "=", ".", "\u221A", ("x"+"\u00B2"), "1/x");
 
         //Set general grid cell attributes
         GridBagConstraints c = new GridBagConstraints();
         c.fill = GridBagConstraints.BOTH;
         c.weightx = 1;
         c.weighty = 1;
+        //c.fill = GridBagConstraints.BOTH;
+
         c.insets = new Insets(2, 2, 2, 2);
 
 
@@ -81,7 +86,7 @@ public class CalculatorMain
         c.gridx = 1;
         calcPanel.add(buttons.get("C"), c);
         c.gridx = 2;
-        calcPanel.add(buttons.get("DEL"), c);
+        calcPanel.add(buttons.get("CE"), c);
         c.gridx = 3;
         calcPanel.add(buttons.get("\u00F7"), c);
 
@@ -105,7 +110,7 @@ public class CalculatorMain
         c.gridx = 2;
         calcPanel.add(buttons.get("9"), c);
         c.gridx = 3;
-        calcPanel.add(buttons.get("X"), c);
+        calcPanel.add(buttons.get("x"), c);
 
         //Row 5
         c.gridy = 4;
@@ -145,6 +150,18 @@ public class CalculatorMain
         //Add panel to the JFrame window
         calcWindow.add(calcPanel);
     }
+    private static int[] distributeSizes(JFrame calcWindow, int num, String rowsOrColumns)
+    {
+        int[] output = new int[num];
+        for(int i = 0; i < num; i++)
+        {
+            if(rowsOrColumns.equalsIgnoreCase("rows"))
+                output[i] = (calcWindow.getHeight() / num);
+            if(rowsOrColumns.equalsIgnoreCase("columns"))
+                output[i] = (calcWindow.getWidth() / num);
+        }
+        return output;
+    }
     private static Map<String, JButton> initializeButtons(String... strings)
     {
         //Loop through strings and create a hashmap of buttons
@@ -154,7 +171,7 @@ public class CalculatorMain
             JButton btn = new JButton(value);
             btn.setForeground(Color.DARK_GRAY);
             btn.setFont(new Font("Arial", Font.BOLD, FONT_SIZE));
-
+            btn.setRolloverEnabled(true);
             output.put(value, btn);
         }
         return output;
