@@ -12,13 +12,12 @@ import java.util.*;
 
 public class CalculatorMain
 {
-    //declare main window JFrame
+    //declare some components
     private static final JFrame calcWindow = new JFrame();
-    private static final int FONT_SIZE = 20;
     private static final JTextField calcDisplay = new JTextField();
     private static final JLabel prevNums = new JLabel("");
-    public static JRadioButton rd1 = new JRadioButton();
-    public static JRadioButton rd2 = new JRadioButton();
+    private static final JRadioButton rd1 = new JRadioButton();
+    private static final JRadioButton rd2 = new JRadioButton();
 
     //Create set containing the buttons
     private static final Map<String, JButton> buttons = initializeButtons("0", "1", "2", "3", "4",
@@ -30,27 +29,51 @@ public class CalculatorMain
     }
 
     //region CalcLabel methods
+
+    /**
+     * Adds text to the calculator display, if it is displaying a result when user
+     * attempts to enter a number, it moves the result up to the previous
+     * calculation label and begins accepting new numbers
+     * @param text is the text to be appended to the label
+     */
     public static void addToDisplay(String text)
     {
-        if(CalculatorFunction.displayingResult)
-            calcDisplay.setText("");
-            CalculatorFunction.displayingResult = false;
-
+        if(CalculatorFunction.isDisplayingResult())//if the label is displaying a result
+        {
+            addToPreviousNums(calcDisplay.getText());//move result up to label bar
+            clearDisplayText();//Clear the display
+            CalculatorFunction.setDisplayingResult(false);
+        }
         calcDisplay.setText(calcDisplay.getText() + text);
     }
+
+    /**
+     * Overwrites the value of the display
+     * @param text is the text to be entered
+     */
     public static void setDisplayText(String text)
     {
         calcDisplay.setText(text);
     }
+
+    /**
+     * Clears the text in the display
+     */
     public static void clearDisplayText()
     {
         calcDisplay.setText("");
     }
+    /**
+     * @return the text in the calculator display
+     */
     public static String getDisplayText()
     {
         return calcDisplay.getText();
     }
-    public static int getTextInt()
+    /**
+     * @return an integer format of the text in the calculator display
+     */
+    public static int getDisplayTextInt()
     {
         try
         {
@@ -63,19 +86,21 @@ public class CalculatorMain
         }
     }
     //endregion
+
     //region prevCalcLabel methods
-    public static void setPreviousNumsLabel(String text)
-    {
-        prevNums.setText(text);
-    }
-    public static String getPreviousNums()
-    {
-        return prevNums.getText();
-    }
+
+    /**
+     * Adds text on to the string of previous calculations
+     * @param text the text to be added
+     */
     public static void addToPreviousNums(String text)
     {
         prevNums.setText(prevNums.getText()+text);
     }
+
+    /**
+     * wipes the text in the previous calculations label
+     */
     public static void clearPreviousNums()
     {
         prevNums.setText("");
@@ -126,7 +151,7 @@ public class CalculatorMain
         {
             JButton btn = new JButton(value);
             btn.setForeground(Color.DARK_GRAY);
-            btn.setFont(new Font("Arial", Font.BOLD, FONT_SIZE));
+            btn.setFont(new Font("Arial", Font.BOLD, 20));
             btn.setRolloverEnabled(true);
             btn.setName(value);
 
@@ -341,4 +366,14 @@ public class CalculatorMain
         //Add panel to the JFrame window
         calcWindow.add(calcPanel);
     }
+    //region Getters/Setters
+    public static JRadioButton getRd1()
+    {
+        return rd1;
+    }
+    public static JRadioButton getRd2()
+    {
+        return rd2;
+    }
+    //endregion
 }
