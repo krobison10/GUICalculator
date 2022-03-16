@@ -48,23 +48,26 @@ class btnSqrtClick implements ActionListener
 {
     @Override
     public void actionPerformed(ActionEvent e) {
-        CalculatorFunction.nonWipeEvent("sqrt");
+        if(!getDisplayText().equals(""))
+            CalculatorFunction.nonWipeEvent("sqrt");
     }
 }
 class btnxSquareClick implements ActionListener
 {
     @Override
     public void actionPerformed(ActionEvent e) {
-        CalculatorFunction.nonWipeEvent("xsquare");
+        if(!getDisplayText().equals(""))
+            CalculatorFunction.nonWipeEvent("xsquare");
     }
 }
 class btnRecipClick implements ActionListener
 {
     @Override
     public void actionPerformed(ActionEvent e) {
-        JOptionPane.showMessageDialog(new JFrame(), "Not implemented yet", "Error",
-        JOptionPane.ERROR_MESSAGE);
-        //CalculatorFunction.nonWipeCalculation("reciprocal");
+        if(!getDisplayText().equals(""))
+            JOptionPane.showMessageDialog(new JFrame(), "Not implemented yet", "Error",
+            JOptionPane.ERROR_MESSAGE);
+            //CalculatorFunction.nonWipeCalculation("reciprocal");
     }
 }
 class btnDivideClick implements ActionListener

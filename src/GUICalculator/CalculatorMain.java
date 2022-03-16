@@ -21,7 +21,7 @@ public class CalculatorMain
 
     //Create set containing the buttons
     private static final Map<String, JButton> buttons = initializeButtons("0", "1", "2", "3", "4",
-    "5", "6", "7", "8", "9", "C", "CE", "\u00F7", "-", "x", "+", "=", ".", "\u221A", ("x"+"\u00B2"), "1/x");
+    "5", "6", "7", "8", "9", "AC", "CE", "\u00F7", "-", "x", "+", "=", ".", "\u221A", ("x"+"\u00B2"), "1/x");
 
     public static void main(String[] args)
     {
@@ -219,6 +219,8 @@ public class CalculatorMain
         prevNums.setForeground(Color.white);
         prevNums.setEnabled(false);
         prevNums.setHorizontalAlignment(SwingConstants.RIGHT);
+        prevNums.setFont(new Font("Arial", Font.PLAIN, 15));
+        prevNums.setVerticalAlignment(SwingConstants.BOTTOM);
         calcPanel.add(prevNums, c);
 
         //Row 2
@@ -263,8 +265,8 @@ public class CalculatorMain
 
         //Proceed with row
         c.gridx = 1;
-        calcPanel.add(buttons.get("C"), c);
-        buttons.get("C").addActionListener(new btnACClick());
+        calcPanel.add(buttons.get("AC"), c);
+        buttons.get("AC").addActionListener(new btnACClick());
 
         c.gridx = 2;
         calcPanel.add(buttons.get("CE"), c);
