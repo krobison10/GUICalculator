@@ -12,25 +12,30 @@ import static GUICalculator.CalculatorMain.*;
  * what kind of button it is. All the methods that these event handlers
  * call need a type variable, which specifies the value of the button.
  */
-class btnRdOnClick implements ActionListener
+class btnIntClick implements ActionListener
 {
     @Override
     public void actionPerformed(ActionEvent e) {
         getRd2().setSelected(false);
+        if(CalculatorFunction.getMode().equals("Float"))
+            CalculatorFunction.setMode("Integer");
     }
 }
-class btnRdOffClick implements ActionListener
+class btnFloatClick implements ActionListener
 {
     @Override
     public void actionPerformed(ActionEvent e) {
         getRd1().setSelected(false);
+        if(CalculatorFunction.getMode().equals("Integer"))
+            CalculatorFunction.setMode("Float");
     }
 }
 class btnCClick implements ActionListener
 {
     @Override
     public void actionPerformed(ActionEvent e) {
-        if(!CalculatorFunction.isDisplayingResult())//Do not want to wipe text unless it was entered by user
+        //Do not want to wipe text unless it was entered by user
+        if(!CalculatorFunction.isDisplayingResult() && !CalculatorFunction.isDisplayingUnaryResult())
             clearDisplayText();
     }
 }
@@ -49,7 +54,8 @@ class btnSqrtClick implements ActionListener
     @Override
     public void actionPerformed(ActionEvent e) {
         if(!getDisplayText().equals(""))
-            CalculatorFunction.nonWipeEvent("sqrt");
+            setDisplayText(String.valueOf(CalculatorFunction.unaryOperation
+                    ("sqrt", getDisplayTextFloat())).replaceAll("\\.?0*$", ""));
     }
 }
 class btnxSquareClick implements ActionListener
@@ -57,7 +63,8 @@ class btnxSquareClick implements ActionListener
     @Override
     public void actionPerformed(ActionEvent e) {
         if(!getDisplayText().equals(""))
-            CalculatorFunction.nonWipeEvent("xsquare");
+            setDisplayText(String.valueOf(CalculatorFunction.unaryOperation
+                    ("xsquare", getDisplayTextFloat())).replaceAll("\\.?0*$", ""));
     }
 }
 class btnRecipClick implements ActionListener
@@ -65,9 +72,16 @@ class btnRecipClick implements ActionListener
     @Override
     public void actionPerformed(ActionEvent e) {
         if(!getDisplayText().equals(""))
-            JOptionPane.showMessageDialog(new JFrame(), "Not implemented yet", "Error",
-            JOptionPane.ERROR_MESSAGE);
-            //CalculatorFunction.nonWipeCalculation("reciprocal");
+            if(CalculatorFunction.getMode().equals("Integer"))
+            {
+                CalculatorMain.showErrorMessage("Not available in integer mode");
+            }
+            else
+            {
+                setDisplayText(String.valueOf(CalculatorFunction.unaryOperation
+                     ("reciprocal", getDisplayTextFloat()))
+                        .replaceAll("\\.?0*$", ""));
+            }
     }
 }
 class btnDivideClick implements ActionListener
@@ -180,7 +194,9 @@ class btnDecimalClick implements ActionListener
 {
     @Override
     public void actionPerformed(ActionEvent e) {
-        JOptionPane.showMessageDialog(new JFrame(), "Not implemented yet", "Error",
-        JOptionPane.ERROR_MESSAGE);
+        if(CalculatorFunction.getMode().equals("Integer"))
+            showErrorMessage("Not available in integer mode");
+        else
+            CalculatorMain.addToDisplay(".");
     }
 }
