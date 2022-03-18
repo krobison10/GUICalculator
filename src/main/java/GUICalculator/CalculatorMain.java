@@ -40,10 +40,14 @@ public class CalculatorMain
     {
         if(CalculatorFunction.isDisplayingResult())//if the label is displaying a result
         {
-            addToPreviousNums(calcDisplay.getText());//move result up to label bar
+            if(!calcDisplay.getText().equalsIgnoreCase("error"))
+            {
+                addToPreviousNums(calcDisplay.getText());//move result up to label bar
+            }
             clearDisplayText();//Clear the display
             CalculatorFunction.setDisplayingResult(false);
         }
+
         calcDisplay.setText(calcDisplay.getText() + text);
     }
 

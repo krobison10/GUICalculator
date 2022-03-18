@@ -1,5 +1,9 @@
 package GUICalculator;
 
+import javax.swing.*;
+
+import java.awt.*;
+
 import static GUICalculator.CalculatorMain.*;
 
 public class CalculatorFunction
@@ -71,7 +75,19 @@ public class CalculatorFunction
 
         //Calculate result if there are two numbers
         if(hasBothNums())
-            result = calculate();
+        {
+            result = calculate(firstNum, lastOperation, secondNum);
+
+            if (result == null) //Error Condition, reset calc
+            {
+                reset();
+                clearPreviousNums();
+                setDisplayText("Error");
+                displayingResult = true;
+                return;
+            }
+        }
+
 
         //If the operation is equals, reset calculator but display result
         if(type.equals("="))
@@ -98,11 +114,11 @@ public class CalculatorFunction
     {
         if(type.equals("xsquare"))
         {
-            setDisplayText(String.valueOf((int)(Math.pow((double) getDisplayTextInt(), 2))));
+            setDisplayText(String.valueOf((int)(Math.pow(getDisplayTextInt(), 2))));
         }
         if(type.equals("sqrt"))
         {
-            setDisplayText(String.valueOf((int)(Math.sqrt((double) getDisplayTextInt()))));
+            setDisplayText(String.valueOf((int)(Math.sqrt(getDisplayTextInt()))));
         }
         if(type.equals("reciprocal"))
         {
@@ -141,11 +157,23 @@ public class CalculatorFunction
      * and return the result to the wipeEvent method.
      * @return the calculation result
      */
-    public static int calculate()
+    public static Integer calculate(int firstNum, String lastOperation, int secondNum) throws ArithmeticException
     {
         if(lastOperation.equals("/"))
         {
-            return firstNum / secondNum;
+            try
+            {
+                return firstNum / secondNum;
+            }
+            catch (ArithmeticException e)
+            {
+                System.out.println(e);
+                //Invoke later so everything isn't frozen until error pane is closed
+                EventQueue.invokeLater( () -> JOptionPane.showMessageDialog(new JFrame(),
+                        "Division by 0", "Error", JOptionPane.ERROR_MESSAGE));
+                return null;
+
+            }
         }
         if(lastOperation.equals("-"))
         {
