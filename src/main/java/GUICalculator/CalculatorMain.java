@@ -3,14 +3,18 @@ package GUICalculator;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.io.IOException;
 import java.util.*;
 
+
 /**
- * @version 1.2 - still does nothing but looks pretty
+ * @version 3.2 - does a lot of things actually
  * @author Kyler Robison
  */
 
-public class CalculatorMain
+public class CalculatorMain extends JFrame
 {
     //declare some components
     private static final JFrame calcWindow = new JFrame();
@@ -25,40 +29,50 @@ public class CalculatorMain
 
     public static void main(String[] args)
     {
-        EventQueue.invokeLater(CalculatorMain::initializeWindow);
+        EventQueue.invokeLater(() -> {
+            try { initializeWindow();}
+            catch (IOException e) { e.printStackTrace(); }
+        });
     }
 
     //region CalcLabel methods
 
     /**
-     * Adds text to the calculator display, if it is displaying a result when user
-     * attempts to enter a number, it moves the result up to the previous
-     * calculation label and begins accepting new numbers
+     * Adds text to the calculator display, does multiple checks to cover
+     * cases where it should overwrite the text or move it up to the previous,
+     * or simply
      * @param text is the text to be appended to the label
      */
-    static void addToDisplay(String text)
+    static void addToDisplay(String text, boolean addingOperator) throws IOException
     {
-        if(CalculatorFunction.isDisplayingUnaryResult())
-        {
-            clearDisplayText();
-            CalculatorFunction.setDisplayingUnaryResult(false);
-        }
+        //Scenario where calculators says null or infinity, clear and reset calculator
         if(calcDisplay.getText().equalsIgnoreCase("null")
             ||calcDisplay.getText().equalsIgnoreCase("infinity"))
         {
             clearDisplayText();
             CalculatorFunction.reset();
-            CalculatorFunction.setDisplayingResult(false);
-            CalculatorFunction.setDisplayingUnaryResult(false);
+            CalculatorFunction.setDisplayingResult();
+            CalculatorFunction.setDisplayingUnaryResultFalse();
         }
-        if(CalculatorFunction.isDisplayingResult())//if the label is displaying a result
+        //Scenario where user goes to add numbers after unary calculation: overwrite it
+        if(CalculatorFunction.isDisplayingUnaryResult() && !addingOperator)
+        {
+            clearDisplayText();
+            CalculatorFunction.setDisplayingUnaryResultFalse();
+        }
+        if(CalculatorFunction.isDisplayingResult() || (CalculatorFunction.isDisplayingUnaryResult() && addingOperator))
         {
             if(!calcDisplay.getText().equalsIgnoreCase("error"))
             {
                 addToPreviousNums(calcDisplay.getText());//move result up to label bar
             }
-            clearDisplayText();//Clear the display
-            CalculatorFunction.setDisplayingResult(false);
+            clearDisplayText();
+
+            if(CalculatorFunction.isDisplayingResult())
+                CalculatorFunction.setDisplayingResult();
+
+            if(CalculatorFunction.isDisplayingUnaryResult())
+                CalculatorFunction.setDisplayingUnaryResultFalse();
         }
 
         calcDisplay.setText(calcDisplay.getText() + text);
@@ -87,9 +101,12 @@ public class CalculatorMain
         return calcDisplay.getText();
     }
     /**
-     * @return an integer format of the text in the calculator display
+     * method that handles the number conversion of the calculator input
+     * in integer mode, it will parse an integer but still return a float
+     * just to verify that the number is a valid integer
+     * @return an float format of the text in the calculator display
      */
-    public static Float getDisplayTextFloat()
+    public static Float getDisplayTextFloat() throws IOException
     {
         try
         {
@@ -104,10 +121,10 @@ public class CalculatorMain
                 return Float.parseFloat(calcDisplay.getText());
             }
         }
-        catch (NumberFormatException e)//Number too large
+        catch (NumberFormatException e)
         {
-            CalculatorFunction.error();
-            showErrorMessage(e.toString());
+            CalculatorFunction.error("Number entered was too large");
+            showErrorMessage("Number entered was too large");
             return null;
         }
     }
@@ -141,6 +158,7 @@ public class CalculatorMain
     {
         EventQueue.invokeLater( () -> JOptionPane.showMessageDialog(new JFrame(),
                 text, "Error", JOptionPane.ERROR_MESSAGE));
+        InputLogger.addErrorMessage(text);
     }
     /**
      * Helper method that determines the size of rows or columns.
@@ -194,26 +212,36 @@ public class CalculatorMain
         }
         return output;
     }
-
     /**
      * Initializes the desired traits of the JFrame window,
      * calls the buildGUI method as part of the startup process
      */
-    private static void initializeWindow()
+    private static void initializeWindow() throws IOException
     {
         //Set attributes for the window, then call the GUI builder
-        calcWindow.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        calcWindow.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         calcWindow.setSize(300,550);
         calcWindow.setResizable(false);
         calcWindow.setTitle("Calculator");
 
-        buildGUI();
+        calcWindow.addWindowListener(new WindowAdapter(){
 
+            public void windowClosing(WindowEvent e){
+                try {
+                    InputLogger.finish();
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                }
+            }
+        });
+
+        buildGUI();
+        InputLogger.initialize();
         calcWindow.setVisible(true);
     }
 
     /**
-     * Hefty method that builds the entire GUI layout. First builds the panel
+     * Builds the entire GUI layout. First builds the panel
      * and sets the behavior of the GridBagLayout. Then it proceeds to draw out
      * the buttons by adjusting the c.gridx or c.gridy to move around the grid.
      * Some components take up more than one cell, that's why sometimes the

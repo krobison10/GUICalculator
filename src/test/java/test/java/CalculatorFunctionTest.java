@@ -3,6 +3,9 @@ package test.java;
 import GUICalculator.CalculatorFunction;
 import GUICalculator.CalculatorMain;
 import org.junit.jupiter.api.*;
+
+import java.io.IOException;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 public class CalculatorFunctionTest
@@ -47,8 +50,7 @@ public class CalculatorFunctionTest
     }
     @Test
     @DisplayName("Calculations: Integer Overflows")
-    void test5()
-    {
+    void test5() throws IOException {
         //Method will return null in error state so asserting null is more concise for this test
         CalculatorFunction.setMode("Integer");
         assertNull(CalculatorFunction.calculate(2147483647, "*", 2147483647));
@@ -57,9 +59,7 @@ public class CalculatorFunctionTest
     }
     @Test
     @DisplayName("User inputs integer too large")
-    void test6()
-    {
-        CalculatorFunction.setMode("Integer");
+    void test6() throws IOException {
         CalculatorMain.setDisplayText("87544375478747594837");
         assertNull(CalculatorMain.getDisplayTextFloat());
     }
@@ -79,8 +79,7 @@ public class CalculatorFunctionTest
     }
     @Test
     @DisplayName("Unary: sqrt with non-integer result")
-    void test9()
-    {
+    void test9() throws IOException {
         /*The error handling in this method works by not doing the operation if there's an error
         so the result should equal the input in the error case*/
         CalculatorFunction.setMode("Integer");

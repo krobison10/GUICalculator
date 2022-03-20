@@ -1,7 +1,7 @@
 package GUICalculator;
 
-import javax.swing.*;
-import java.awt.*;
+import java.io.IOException;
+
 import static GUICalculator.CalculatorMain.*;
 
 public class CalculatorFunction
@@ -22,12 +22,12 @@ public class CalculatorFunction
 
 
     /**
-     * Method that processes the events that will wipe the calculator display. Handles
+     * Method that processes the operations that will wipe the calculator display. Handles
      * tasks like moving text from the main display to the label that displays the
      * previous number and operation
      * @param type is the operation type
      */
-    static void wipeEvent(String type)
+    static void operation(String type) throws IOException
     {
         //All the break cases, any and all states that prevent proper function
         if( getDisplayText().equals("") /*Display is empty*/
@@ -50,16 +50,17 @@ public class CalculatorFunction
         if(firstNum == null)
         {
             firstNum = getDisplayTextFloat();
+            InputLogger.addFirstNum(String.valueOf(firstNum).replaceAll("\\.?0*$", ""));
         }
         //There's a first number, but not second, so populate second
         else if(secondNum == null)
         {
             secondNum = getDisplayTextFloat();
+            InputLogger.addSecondNum(String.valueOf(secondNum).replaceAll("\\.?0*$", ""));
             hasBothNums = true;
         }
-        displayingUnaryResult = false;
         //Add the operator to the string
-        addToDisplay(getUnicodeOperator(type));
+        addToDisplay(getUnicodeOperator(type), true);
         if(!type.equals("="))
             lastOperation = type;
 
@@ -71,10 +72,11 @@ public class CalculatorFunction
         if(hasBothNums())
         {
             result = calculate(firstNum, lastOperation, secondNum);
-
+            InputLogger.addOperationAndResult(lastOperation,
+                    String.valueOf(result).replaceAll("\\.?0*$", ""));
             if (result == null) //Error Condition, reset calc
             {
-                error();
+                error("");
                 return;
             }
         }
@@ -94,8 +96,13 @@ public class CalculatorFunction
         }
     }
 
-    static void error()
+    /**
+     * Method that sets the calculator into an error state, used in very few
+     * circumstances but an important failsafe nonetheless
+     */
+    static void error(String message) throws IOException
     {
+        InputLogger.addErrorMessage(message);
         reset();
         clearPreviousNums();
         setDisplayText("Error");
@@ -103,19 +110,34 @@ public class CalculatorFunction
     }
 
     /**
+     * Method that resets the many variables that represent the calculator state, to be
+     * called when the equals or all clear buttons are pressed
+     */
+    static void reset() throws IOException
+    {
+        firstNum = null;
+        lastOperation = null;
+        secondNum = null;
+        result = null;
+
+        InputLogger.closeLine();
+        InputLogger.newLog();
+
+        displayingResult = false;
+    }
+    /**
      * Changes the operation mode of the calculator
      */
-    static void changeMode(String newMode)
+    static void changeMode(String newMode) throws IOException
     {
         mode = newMode;
         clearPreviousNums();
         clearDisplayText();
         reset();
     }
+
     /**
-     * Method that handles the calculations that don't wipe the calculator display
-     * on execution. Calculations like exponents or square roots, better to be done in
-     * place
+     * Method that handles the unary operations
      * @param type the type of operation
      */
     public static Float unaryOperation(String type, Float number) throws ArithmeticException
@@ -138,6 +160,7 @@ public class CalculatorFunction
                 displayingUnaryResult = true;
                 return (float)(Math.pow(number, 2));
             }
+
             if(type.equals("sqrt"))
             {
                 float result = (float) Math.sqrt(number);
@@ -157,6 +180,7 @@ public class CalculatorFunction
                 displayingUnaryResult = true;
                 return result;
             }
+
             //For the integer calculator, I have this function disabled, because the only
             //operand that yields an integer is 1
             if(type.equals("reciprocal"))
@@ -175,9 +199,7 @@ public class CalculatorFunction
     }
 
     /**
-     * Adds the operator character to the method. Takes the type of operation and
-     * appends the proper character to the display or a unicode character if
-     * necessary
+     * Returns the unicode version of the operator if required.
      * @param type of operation
      */
     private static String getUnicodeOperator(String type)
@@ -201,7 +223,6 @@ public class CalculatorFunction
         }
         return "";
     }
-
     /**
      * The main calculation method that uses the class variables to execute the calculation
      * and return the result to the wipeEvent method. Uses special Math class methods to
@@ -222,10 +243,14 @@ public class CalculatorFunction
             }
             if(lastOperation.equals("/") && !mode.equals("Float"))
             {
+                if(secondNum == 0)
+                    return null;
                 return (float) firstInt / secondInt;
             }
             else if(lastOperation.equals("/"))
             {
+                if(secondNum == 0)
+                    return null;
                 return firstNum / secondNum;
             }
             if(lastOperation.equals("-") && !mode.equals("Float"))
@@ -261,24 +286,8 @@ public class CalculatorFunction
             return null;
         }
     }
-    /**
-     * Method that resets the many variables that represent the calculator state, to be
-     * called when the equals or all clear buttons are pressed
-     */
-    static void reset()
-    {
-        firstNum = null;
-        lastOperation = null;
-        secondNum = null;
-        result = null;
 
-        displayingResult = false;
-
-        if(displayingUnaryResult)
-            clearDisplayText();
-        displayingUnaryResult = false;
-    }
-
+    //region Getters/Setters
     /**
      * @return true if the display is displaying the result of a unary calculation
      */
@@ -286,14 +295,20 @@ public class CalculatorFunction
     {
         return displayingUnaryResult;
     }
-
     /**
      * Sets the variable that represents whether the display is showing the result of a unary calculation
-     * @param in the new value
      */
-    static void setDisplayingUnaryResult(boolean in)
+    static void setDisplayingUnaryResultFalse()
     {
-        displayingUnaryResult = in;
+        displayingUnaryResult = false;
+    }
+    /**
+     * @param newMode the new calculator mode
+     */
+    public static void setMode(String newMode) throws IOException
+    {
+        mode = newMode;
+        changeMode(newMode);
     }
     /**
      * @return true if both of the number variables are non-null
@@ -313,11 +328,10 @@ public class CalculatorFunction
     /**
      * Sets the variable that represents whether the calculator is displaying a
      * result or not
-     * @param in the value to be applied
      */
-    static void setDisplayingResult(boolean in)
+    static void setDisplayingResult()
     {
-        displayingResult = in;
+        displayingResult = false;
     }
     /**
      * @return the current calculator mode
@@ -326,12 +340,5 @@ public class CalculatorFunction
     {
         return mode;
     }
-    /**
-     * @param newMode the new calculator mode
-     */
-    public static void setMode(String newMode)
-    {
-        mode = newMode;
-        changeMode(newMode);
-    }
+    //endregion
 }
