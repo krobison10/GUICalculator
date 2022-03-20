@@ -4,6 +4,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
 
+import static GUICalculator.CalculatorFunction.df;
 import static GUICalculator.CalculatorMain.*;
 
 /**
@@ -75,8 +76,8 @@ class btnSqrtClick implements ActionListener
                 && !getDisplayText().equalsIgnoreCase("infinity"))
         {
             try {
-                setDisplayText(String.valueOf(CalculatorFunction.unaryOperation
-                    ("sqrt", getDisplayTextFloat())).replaceAll("\\.?0*$", ""));
+                setDisplayText(df.format(CalculatorFunction.unaryOperation
+                    ("sqrt", getDisplayTextFloat())));
             }
             catch (IOException ex) { ex.printStackTrace(); }
         }
@@ -93,8 +94,8 @@ class btnxSquareClick implements ActionListener
         {
             try
             {
-                setDisplayText(String.valueOf(CalculatorFunction.unaryOperation
-                        ("xsquare", getDisplayTextFloat())).replaceAll("\\.?0*$", ""));
+                setDisplayText(df.format(CalculatorFunction.unaryOperation
+                        ("xsquare", getDisplayTextFloat())));
             }
             catch (IOException ex) { ex.printStackTrace(); }
         }
@@ -117,9 +118,8 @@ class btnRecipClick implements ActionListener
             {
                 try
                 {
-                    setDisplayText(String.valueOf(CalculatorFunction.unaryOperation
-                                    ("reciprocal", getDisplayTextFloat()))
-                            .replaceAll("\\.?0*$", ""));
+                    setDisplayText(df.format(CalculatorFunction.unaryOperation
+                                    ("reciprocal", getDisplayTextFloat())));
                 }
                 catch (IOException ex) { ex.printStackTrace(); }
             }
@@ -294,9 +294,7 @@ class btnDecimalClick implements ActionListener
     @Override
     public void actionPerformed(ActionEvent e)
     {
-        if(CalculatorFunction.getMode().equals("Integer"))
-            showErrorMessage("Not available in integer mode");
-        else
+        if(!getDisplayText().contains("."))
         {
             try { CalculatorMain.addToDisplay(".", false); }
             catch (IOException ex) { ex.printStackTrace(); }

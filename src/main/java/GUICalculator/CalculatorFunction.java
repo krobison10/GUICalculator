@@ -1,6 +1,7 @@
 package GUICalculator;
 
 import java.io.IOException;
+import java.text.DecimalFormat;
 
 import static GUICalculator.CalculatorMain.*;
 
@@ -13,6 +14,7 @@ public class CalculatorFunction
     private static Float result = null;
 
     private static String mode = "Integer";
+    public static DecimalFormat df = new DecimalFormat("0");
 
     //Boolean variables representing that status of multiple things
     private static boolean hasBothNums = false;
@@ -50,13 +52,13 @@ public class CalculatorFunction
         if(firstNum == null)
         {
             firstNum = getDisplayTextFloat();
-            InputLogger.addFirstNum(String.valueOf(firstNum).replaceAll("\\.?0*$", ""));
+            InputLogger.addFirstNum(df.format(firstNum));
         }
         //There's a first number, but not second, so populate second
         else if(secondNum == null)
         {
             secondNum = getDisplayTextFloat();
-            InputLogger.addSecondNum(String.valueOf(secondNum).replaceAll("\\.?0*$", ""));
+            InputLogger.addSecondNum(df.format(secondNum));
             hasBothNums = true;
         }
         //Add the operator to the string
@@ -73,7 +75,7 @@ public class CalculatorFunction
         {
             result = calculate(firstNum, lastOperation, secondNum);
             InputLogger.addOperationAndResult(lastOperation,
-                    String.valueOf(result).replaceAll("\\.?0*$", ""));
+                    df.format(result));
             if (result == null) //Error Condition, reset calc
             {
                 error("");
@@ -85,9 +87,9 @@ public class CalculatorFunction
         if(type.equals("="))
         {
             if(hasBothNums())
-                setDisplayText(String.valueOf(result).replaceAll("\\.?0*$", ""));
+                setDisplayText(df.format(result));
             else
-                setDisplayText(String.valueOf(firstNum).replaceAll("\\.?0*$", ""));
+                setDisplayText(df.format(firstNum));
             addToPreviousNums("=");
             reset();
             newCalculation = true;
@@ -130,6 +132,16 @@ public class CalculatorFunction
      */
     static void changeMode(String newMode) throws IOException
     {
+        if(newMode.equals("Integer"))
+        {
+            getButton(".").setEnabled(false);
+            getButton("1/x").setEnabled(false);
+        }
+        else
+        {
+            getButton(".").setEnabled(true);
+            getButton("1/x").setEnabled(true);
+        }
         mode = newMode;
         clearPreviousNums();
         clearDisplayText();
@@ -245,7 +257,7 @@ public class CalculatorFunction
             {
                 if(secondNum == 0)
                     return null;
-                return (float) firstInt / secondInt;
+                return (float) Math.round(firstNum / secondNum);
             }
             else if(lastOperation.equals("/"))
             {

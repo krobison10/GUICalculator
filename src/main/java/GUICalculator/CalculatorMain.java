@@ -10,7 +10,6 @@ import java.util.*;
 
 
 /**
- * @version 3.2 - does a lot of things actually
  * @author Kyler Robison
  */
 
@@ -237,6 +236,8 @@ public class CalculatorMain extends JFrame
 
         buildGUI();
         InputLogger.initialize();
+        CalculatorFunction.setMode("Integer");
+        CalculatorFunction.df.setMaximumFractionDigits(6);
         calcWindow.setVisible(true);
     }
 
@@ -432,6 +433,16 @@ public class CalculatorMain extends JFrame
         calcWindow.add(calcPanel);
     }
     //region Getters/Setters
+
+    /**
+     * Returns a reference to any of the buttons from the hashmap that contains them
+     * @param key the button name
+     * @return the JButton object
+     */
+    public static JButton getButton(String key)
+    {
+        return buttons.get(key);
+    }
     public static JRadioButton getRd1()
     {
         return rd1;
