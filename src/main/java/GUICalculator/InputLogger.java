@@ -1,17 +1,21 @@
 package GUICalculator;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.time.LocalDateTime;
-import java.io.*;
-import java.util.Scanner;
+import java.util.ArrayList;
 
 public class InputLogger
 {
+    //region Static Fields
     private static File file;
     private static FileWriter writer;
-    private static String totalContents = "";
 
-    private static String firstNumber = "", operation = "", secondNumber = "", result = "", errorMessage = "";
-    private static boolean hasErrorMessage = false;
+    private static String totalContents = "";
+    private static String firstNumber = "", operation = "", secondNumber = "", result = "";
+    private static final ArrayList<String> errors = new ArrayList<>();
+    //endregion
 
     static void initialize()
     {
@@ -40,8 +44,8 @@ public class InputLogger
     }
     static void addErrorMessage(String message)
     {
-        errorMessage = message;
-        hasErrorMessage = true;
+
+        errors.add(message);
     }
     static void newLog()
     {
@@ -49,21 +53,21 @@ public class InputLogger
         operation = "";
         secondNumber = "";
         result = "";
-        errorMessage = "";
-
-        hasErrorMessage = false;
+        errors.clear();
     }
     static void closeLine()
     {
-        String line = firstNumber;
-        if(operation.length() > 0)
-            line += " " + operation;
-        if(secondNumber.length() > 0 )
-            line += " " + secondNumber;
-        if(result.length() > 0)
-            line += " = " + result;
-        if(hasErrorMessage)
-            line += "->Error: " + errorMessage;
+        StringBuilder line = new StringBuilder(firstNumber);
+        if(operation != null && operation.length() > 0)
+            line.append(" ").append(operation);
+        if(secondNumber != null && secondNumber.length() > 0 )
+            line.append(" ").append(secondNumber);
+        if(result != null && result.length() > 0)
+            line.append(" = ").append(result);
+        for(String err : errors)
+        {
+            line.append("->Error: ").append(err);
+        }
         if(line.length() > 0)
         {
             totalContents += line + "\n";
@@ -75,21 +79,20 @@ public class InputLogger
         writer.close();
         printToConsole();
     }
-
     private static void printToConsole()
     {
         System.out.println("Log file created: " + file.getName() + "\n" + totalContents);
     }
-    /**
-     * Deprecated, of course, reading from the file is the file is the correct way to
+    /*
+     * Deprecated method. Of course, reading from the file is the file is the correct way to
      * get the contents, but with the structure of my program currently, this method
      * of writing to the file each time doesn't allow the JUnit testing to work, but
-     * I left the method here so you can see that I at least knew of the proper way
-     * to do it, but save myself a lot of refactoring for little gain
+     * I left the method here, so you can see that I at least knew of the proper way
+     * to do it, and save myself a lot of refactoring for little gain to make it work
      *
      * @return the contents of the log file
-     * @throws FileNotFoundException if there is trouble acessing the file
-     */
+     * @throws FileNotFoundException if there is trouble accessing the file
+     *
     private static String getFileContents() throws FileNotFoundException
     {
         StringBuilder entireLogString = new StringBuilder();
@@ -102,5 +105,5 @@ public class InputLogger
         scanner.close();
 
         return entireLogString.toString();
-    }
+    }*/
 }

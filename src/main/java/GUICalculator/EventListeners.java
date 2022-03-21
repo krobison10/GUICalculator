@@ -2,7 +2,6 @@ package GUICalculator;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.IOException;
 
 import static GUICalculator.CalculatorFunction.df;
 import static GUICalculator.CalculatorMain.*;
@@ -12,17 +11,17 @@ import static GUICalculator.CalculatorMain.*;
  * all they do is call some method from sort of method and tell that method
  * what kind of button it is. All the methods that these event handlers
  * call need a type variable, which specifies the value of the button.
+ * Some methods do basic input checking
  */
 class btnIntClick implements ActionListener
 {
     @Override
     public void actionPerformed(ActionEvent e)
     {
-        getRd2().setSelected(false);
+        getRadioFloat().setSelected(false);
         if(CalculatorFunction.getMode().equals("Float"))
         {
-            try { CalculatorFunction.setMode("Integer"); }
-            catch (IOException ex) { ex.printStackTrace(); }
+            CalculatorFunction.changeMode("Integer");
         }
     }
 }
@@ -31,11 +30,10 @@ class btnFloatClick implements ActionListener
     @Override
     public void actionPerformed(ActionEvent e)
     {
-        getRd1().setSelected(false);
+        getRadioInt().setSelected(false);
         if(CalculatorFunction.getMode().equals("Integer"))
         {
-            try { CalculatorFunction.setMode("Float"); }
-            catch (IOException ex) { ex.printStackTrace(); }
+            CalculatorFunction.changeMode("Float");
         }
     }
 }
@@ -62,8 +60,8 @@ class btnACClick implements ActionListener
     {
         clearPreviousNums();
         clearDisplayText();
-        try { CalculatorFunction.reset(); }
-        catch (IOException ex) { ex.printStackTrace(); }
+        CalculatorFunction.reset();
+
     }
 }
 class btnSqrtClick implements ActionListener
@@ -71,15 +69,10 @@ class btnSqrtClick implements ActionListener
     @Override
     public void actionPerformed(ActionEvent e)
     {
-        if(!getDisplayText().equals("")  && !getDisplayText().equalsIgnoreCase("null")
-                && !getDisplayText().equalsIgnoreCase("error")
-                && !getDisplayText().equalsIgnoreCase("infinity"))
+        if(!getDisplayText().equals("") && !getDisplayText().equalsIgnoreCase("error"))
         {
-            try {
-                setDisplayText(df.format(CalculatorFunction.unaryOperation
-                    ("sqrt", getDisplayTextFloat())));
-            }
-            catch (IOException ex) { ex.printStackTrace(); }
+            setDisplayText(df.format(CalculatorFunction.unaryOperation
+                ("sqrt", getDisplayTextDouble())));
         }
     }
 }
@@ -88,16 +81,10 @@ class btnxSquareClick implements ActionListener
     @Override
     public void actionPerformed(ActionEvent e)
     {
-        if(!getDisplayText().equals("") && !getDisplayText().equalsIgnoreCase("null")
-                && !getDisplayText().equalsIgnoreCase("error")
-                && !getDisplayText().equalsIgnoreCase("infinity"))
+        if(!getDisplayText().equals("") && !getDisplayText().equalsIgnoreCase("error"))
         {
-            try
-            {
-                setDisplayText(df.format(CalculatorFunction.unaryOperation
-                        ("xsquare", getDisplayTextFloat())));
-            }
-            catch (IOException ex) { ex.printStackTrace(); }
+            setDisplayText(df.format(CalculatorFunction.unaryOperation
+                    ("xsquare", getDisplayTextDouble())));
         }
     }
 }
@@ -106,23 +93,10 @@ class btnRecipClick implements ActionListener
     @Override
     public void actionPerformed(ActionEvent e)
     {
-        if(!getDisplayText().equals("") && !getDisplayText().equalsIgnoreCase("null")
-                && !getDisplayText().equalsIgnoreCase("error")
-                && !getDisplayText().equalsIgnoreCase("infinity"))
+        if(!getDisplayText().equals("") && !getDisplayText().equalsIgnoreCase("error"))
         {
-            if (CalculatorFunction.getMode().equals("Integer"))
-            {
-                CalculatorMain.showErrorMessage("Not available in integer mode");
-            }
-            else
-            {
-                try
-                {
-                    setDisplayText(df.format(CalculatorFunction.unaryOperation
-                                    ("reciprocal", getDisplayTextFloat())));
-                }
-                catch (IOException ex) { ex.printStackTrace(); }
-            }
+            setDisplayText(df.format(CalculatorFunction.unaryOperation
+                    ("reciprocal", getDisplayTextDouble())));
         }
     }
 }
@@ -131,15 +105,9 @@ class btnDivideClick implements ActionListener
     @Override
     public void actionPerformed(ActionEvent e)
     {
-        if(!getDisplayText().equalsIgnoreCase("null")
-                && !getDisplayText().equalsIgnoreCase("error")
-                && !getDisplayText().equalsIgnoreCase("infinity"))
+        if(!getDisplayText().equals("") && !getDisplayText().equalsIgnoreCase("error"))
         {
-            try
-            {
-                CalculatorFunction.operation("/");
-            }
-            catch (IOException ex) { ex.printStackTrace(); }
+            CalculatorFunction.operation("/");
         }
     }
 }
@@ -148,12 +116,9 @@ class btnMinusClick implements ActionListener
     @Override
     public void actionPerformed(ActionEvent e)
     {
-        if(!getDisplayText().equalsIgnoreCase("null")
-                && !getDisplayText().equalsIgnoreCase("error")
-                && !getDisplayText().equalsIgnoreCase("infinity"))
+        if(!getDisplayText().equals("") && !getDisplayText().equalsIgnoreCase("error"))
         {
-            try { CalculatorFunction.operation("-"); }
-            catch (IOException ex) { ex.printStackTrace(); }
+            CalculatorFunction.operation("-");
         }
     }
 }
@@ -162,12 +127,9 @@ class btnMultiplyClick implements ActionListener
     @Override
     public void actionPerformed(ActionEvent e) {
 
-        if(!getDisplayText().equalsIgnoreCase("null")
-                && !getDisplayText().equalsIgnoreCase("error")
-                && !getDisplayText().equalsIgnoreCase("infinity"))
+        if(!getDisplayText().equals("") && !getDisplayText().equalsIgnoreCase("error"))
         {
-            try { CalculatorFunction.operation("*"); }
-            catch (IOException ex) { ex.printStackTrace(); }
+            CalculatorFunction.operation("*");
         }
     }
 }
@@ -176,12 +138,9 @@ class btnAddClick implements ActionListener
     @Override
     public void actionPerformed(ActionEvent e)
     {
-        if(!getDisplayText().equalsIgnoreCase("null")
-                && !getDisplayText().equalsIgnoreCase("error")
-                && !getDisplayText().equalsIgnoreCase("infinity"))
+        if(!getDisplayText().equals("") && !getDisplayText().equalsIgnoreCase("error"))
         {
-            try { CalculatorFunction.operation("+"); }
-            catch (IOException ex) { ex.printStackTrace(); }
+            CalculatorFunction.operation("+");
         }
     }
 }
@@ -190,12 +149,9 @@ class btnEqualsClick implements ActionListener
     @Override
     public void actionPerformed(ActionEvent e)
     {
-        if(!getDisplayText().equalsIgnoreCase("null")
-                || !getDisplayText().equalsIgnoreCase("error")
-                && !getDisplayText().equalsIgnoreCase("infinity"))
+        if(!getDisplayText().equals("") && !getDisplayText().equalsIgnoreCase("error"))
         {
-            try { CalculatorFunction.operation("="); }
-            catch (IOException ex) { ex.printStackTrace(); }
+            CalculatorFunction.operation("=");
         }
     }
 }
@@ -204,8 +160,7 @@ class btn1Click implements ActionListener
     @Override
     public void actionPerformed(ActionEvent e)
     {
-        try { CalculatorMain.addToDisplay("1", false); }
-        catch (IOException ex) { ex.printStackTrace(); }
+        CalculatorMain.addToDisplay("1", false);
     }
 }
 class btn2Click implements ActionListener
@@ -213,8 +168,7 @@ class btn2Click implements ActionListener
     @Override
     public void actionPerformed(ActionEvent e)
     {
-        try { CalculatorMain.addToDisplay("2", false); }
-        catch (IOException ex) { ex.printStackTrace(); }
+        CalculatorMain.addToDisplay("2", false);
     }
 }
 class btn3Click implements ActionListener
@@ -222,8 +176,7 @@ class btn3Click implements ActionListener
     @Override
     public void actionPerformed(ActionEvent e)
     {
-        try { CalculatorMain.addToDisplay("3", false); }
-        catch (IOException ex) { ex.printStackTrace(); }
+        CalculatorMain.addToDisplay("3", false);
     }
 }
 class btn4Click implements ActionListener
@@ -231,8 +184,7 @@ class btn4Click implements ActionListener
     @Override
     public void actionPerformed(ActionEvent e)
     {
-        try { CalculatorMain.addToDisplay("4", false); }
-        catch (IOException ex) { ex.printStackTrace(); }
+        CalculatorMain.addToDisplay("4", false);
     }
 }
 class btn5Click implements ActionListener
@@ -240,8 +192,7 @@ class btn5Click implements ActionListener
     @Override
     public void actionPerformed(ActionEvent e)
     {
-        try { CalculatorMain.addToDisplay("5", false); }
-        catch (IOException ex) { ex.printStackTrace(); }
+        CalculatorMain.addToDisplay("5", false);
     }
 }
 class btn6Click implements ActionListener
@@ -249,8 +200,7 @@ class btn6Click implements ActionListener
     @Override
     public void actionPerformed(ActionEvent e)
     {
-        try { CalculatorMain.addToDisplay("6", false); }
-        catch (IOException ex) { ex.printStackTrace(); }
+        CalculatorMain.addToDisplay("6", false);
     }
 }
 class btn7Click implements ActionListener
@@ -258,8 +208,7 @@ class btn7Click implements ActionListener
     @Override
     public void actionPerformed(ActionEvent e)
     {
-        try { CalculatorMain.addToDisplay("7", false); }
-        catch (IOException ex) { ex.printStackTrace(); }
+        CalculatorMain.addToDisplay("7", false);
     }
 }
 class btn8Click implements ActionListener
@@ -267,8 +216,7 @@ class btn8Click implements ActionListener
     @Override
     public void actionPerformed(ActionEvent e)
     {
-        try { CalculatorMain.addToDisplay("8", false); }
-        catch (IOException ex) { ex.printStackTrace(); }
+        CalculatorMain.addToDisplay("8", false);
     }
 }
 class btn9Click implements ActionListener
@@ -276,8 +224,7 @@ class btn9Click implements ActionListener
     @Override
     public void actionPerformed(ActionEvent e)
     {
-        try { CalculatorMain.addToDisplay("9", false); }
-        catch (IOException ex) { ex.printStackTrace(); }
+        CalculatorMain.addToDisplay("9", false);
     }
 }
 class btn0Click implements ActionListener
@@ -285,8 +232,7 @@ class btn0Click implements ActionListener
     @Override
     public void actionPerformed(ActionEvent e)
     {
-        try { CalculatorMain.addToDisplay("0", false); }
-        catch (IOException ex) { ex.printStackTrace(); }
+        CalculatorMain.addToDisplay("0", false);
     }
 }
 class btnDecimalClick implements ActionListener
@@ -296,8 +242,7 @@ class btnDecimalClick implements ActionListener
     {
         if(!getDisplayText().contains("."))
         {
-            try { CalculatorMain.addToDisplay(".", false); }
-            catch (IOException ex) { ex.printStackTrace(); }
+            CalculatorMain.addToDisplay(".", false);
         }
     }
 }

@@ -6,53 +6,40 @@ import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.IOException;
-import java.util.*;
-
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author Kyler Robison
  */
-
 public class CalculatorMain extends JFrame
 {
-    //declare some components
+    //region Static Fields
     private static final JFrame calcWindow = new JFrame();
     private static final JTextField calcDisplay = new JTextField();
     private static final JLabel prevNums = new JLabel("");
-    private static final JRadioButton rd1 = new JRadioButton();
-    private static final JRadioButton rd2 = new JRadioButton();
+    private static final JRadioButton radioInt = new JRadioButton();
+    private static final JRadioButton radioFloat = new JRadioButton();
 
     //Create set containing the buttons
     private static final Map<String, JButton> buttons = initializeButtons("0", "1", "2", "3", "4",
     "5", "6", "7", "8", "9", "AC", "CE", "\u00F7", "-", "x", "+", "=", ".", "\u221A", ("x"+"\u00B2"), "1/x");
+    //endregion
 
     public static void main(String[] args)
     {
-        EventQueue.invokeLater(() -> {
-            try { initializeWindow();}
-            catch (IOException e) { e.printStackTrace(); }
-        });
+        EventQueue.invokeLater(CalculatorMain::initializeWindow);
     }
 
     //region CalcLabel methods
-
     /**
      * Adds text to the calculator display, does multiple checks to cover
      * cases where it should overwrite the text or move it up to the previous,
      * or simply
      * @param text is the text to be appended to the label
      */
-    static void addToDisplay(String text, boolean addingOperator) throws IOException
+    static void addToDisplay(String text, boolean addingOperator)
     {
-        //Scenario where calculators says null or infinity, clear and reset calculator
-        if(calcDisplay.getText().equalsIgnoreCase("null")
-            ||calcDisplay.getText().equalsIgnoreCase("infinity"))
-        {
-            clearDisplayText();
-            CalculatorFunction.reset();
-            CalculatorFunction.setDisplayingResult();
-            CalculatorFunction.setDisplayingUnaryResultFalse();
-        }
         //Scenario where user goes to add numbers after unary calculation: overwrite it
         if(CalculatorFunction.isDisplayingUnaryResult() && !addingOperator)
         {
@@ -85,6 +72,7 @@ public class CalculatorMain extends JFrame
     {
         calcDisplay.setText(text);
     }
+
     /**
      * Clears the text in the display
      */
@@ -92,6 +80,7 @@ public class CalculatorMain extends JFrame
     {
         calcDisplay.setText("");
     }
+
     /**
      * @return the text in the calculator display
      */
@@ -99,13 +88,14 @@ public class CalculatorMain extends JFrame
     {
         return calcDisplay.getText();
     }
+
     /**
      * method that handles the number conversion of the calculator input
      * in integer mode, it will parse an integer but still return a float
      * just to verify that the number is a valid integer
      * @return an float format of the text in the calculator display
      */
-    public static Float getDisplayTextFloat() throws IOException
+    public static Double getDisplayTextDouble()
     {
         try
         {
@@ -113,11 +103,11 @@ public class CalculatorMain extends JFrame
             {
                 /*In integer mode, this parse and cast verifies the int is valid
                 even in a method that returns a float*/
-                return (float) Integer.parseInt(calcDisplay.getText());
+                return (double) Integer.parseInt(calcDisplay.getText());
             }
             else
             {
-                return Float.parseFloat(calcDisplay.getText());
+                return Double.parseDouble(calcDisplay.getText());
             }
         }
         catch (NumberFormatException e)
@@ -159,6 +149,7 @@ public class CalculatorMain extends JFrame
                 text, "Error", JOptionPane.ERROR_MESSAGE));
         InputLogger.addErrorMessage(text);
     }
+
     /**
      * Helper method that determines the size of rows or columns.
      * To evenly space n number of rows or columns, the total amount
@@ -211,11 +202,12 @@ public class CalculatorMain extends JFrame
         }
         return output;
     }
+
     /**
      * Initializes the desired traits of the JFrame window,
      * calls the buildGUI method as part of the startup process
      */
-    private static void initializeWindow() throws IOException
+    private static void initializeWindow()
     {
         //Set attributes for the window, then call the GUI builder
         calcWindow.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -223,21 +215,25 @@ public class CalculatorMain extends JFrame
         calcWindow.setResizable(false);
         calcWindow.setTitle("Calculator");
 
-        calcWindow.addWindowListener(new WindowAdapter(){
-
-            public void windowClosing(WindowEvent e){
-                try {
+        calcWindow.addWindowListener(new WindowAdapter()
+        {
+            public void windowClosing(WindowEvent e)
+            {
+                CalculatorFunction.reset();
+                try
+                {
                     InputLogger.finish();
-                } catch (IOException ex) {
-                    ex.printStackTrace();
                 }
+                catch (IOException ex) { ex.printStackTrace(); }
             }
         });
 
         buildGUI();
+
         InputLogger.initialize();
-        CalculatorFunction.setMode("Integer");
-        CalculatorFunction.df.setMaximumFractionDigits(6);
+        CalculatorFunction.changeMode("Integer");
+        CalculatorFunction.df.setMaximumFractionDigits(8);
+
         calcWindow.setVisible(true);
     }
 
@@ -312,18 +308,18 @@ public class CalculatorMain extends JFrame
         JPanel radioButtons = new JPanel(new GridLayout(2,1));
         radioButtons.setBackground(Color.DARK_GRAY);
 
-        rd1.setText("int");
-        rd1.setFont(new Font("Arial", Font.BOLD, 15));
-        rd1.setForeground(Color.white);
-        rd1.setSelected(true);
-        rd1.addActionListener(new btnIntClick());
-        radioButtons.add(rd1);
+        radioInt.setText("int");
+        radioInt.setFont(new Font("Arial", Font.BOLD, 15));
+        radioInt.setForeground(Color.white);
+        radioInt.setSelected(true);
+        radioInt.addActionListener(new btnIntClick());
+        radioButtons.add(radioInt);
 
-        rd2.setText("float");
-        rd2.setFont(new Font("Arial", Font.BOLD, 15));
-        rd2.setForeground(Color.white);
-        rd2.addActionListener(new btnFloatClick());
-        radioButtons.add(rd2);
+        radioFloat.setText("float");
+        radioFloat.setFont(new Font("Arial", Font.BOLD, 15));
+        radioFloat.setForeground(Color.white);
+        radioFloat.addActionListener(new btnFloatClick());
+        radioButtons.add(radioFloat);
 
         calcPanel.add(radioButtons, c);
 
@@ -443,13 +439,21 @@ public class CalculatorMain extends JFrame
     {
         return buttons.get(key);
     }
-    public static JRadioButton getRd1()
+
+    /**
+     * @return reference to the radio button
+     */
+    public static JRadioButton getRadioInt()
     {
-        return rd1;
+        return radioInt;
     }
-    public static JRadioButton getRd2()
+
+    /**
+     * @return the reference to the radio button
+     */
+    public static JRadioButton getRadioFloat()
     {
-        return rd2;
+        return radioFloat;
     }
     //endregion
 }

@@ -1,0 +1,6 @@
+5 * 5 = 25
+8 - 2 = 6
+10 / 0->Error: java.lang.ArithmeticException: Division by 0
+9999999 * 999999->Error: java.lang.ArithmeticException: integer overflow
+20 - 3 = 17
+5.5 - 1.7 = 3.8

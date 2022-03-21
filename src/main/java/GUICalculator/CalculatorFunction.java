@@ -1,41 +1,41 @@
 package GUICalculator;
 
-import java.io.IOException;
 import java.text.DecimalFormat;
 
 import static GUICalculator.CalculatorMain.*;
 
 public class CalculatorFunction
 {
-    //Global calculation variables
-    private static Float firstNum = null;
+    //region Static Fields
+    private static Double firstNum = null;
     private static String lastOperation = null;
-    private static Float secondNum = null;
-    private static Float result = null;
+    private static Double secondNum = null;
+    private static Double result = null;
 
     private static String mode = "Integer";
-    public static DecimalFormat df = new DecimalFormat("0");
+
+    public static final DecimalFormat df = new DecimalFormat("0");
 
     //Boolean variables representing that status of multiple things
     private static boolean hasBothNums = false;
     private static boolean displayingResult = false;
     private static boolean newCalculation = true;
     private static boolean displayingUnaryResult = false;
+    //endregion
 
 
     /**
-     * Method that processes the operations that will wipe the calculator display. Handles
+     * Method that processes the operations that will wipe the calculator display. Handle
      * tasks like moving text from the main display to the label that displays the
      * previous number and operation
      * @param type is the operation type
      */
-    static void operation(String type) throws IOException
-    {
+    static void operation(String type) {
         //All the break cases, any and all states that prevent proper function
         if( getDisplayText().equals("") /*Display is empty*/
         || (firstNum != null && !type.equals("=")) /*User tried to begin a chain operation*/
         || (type.equals("=") && displayingResult) /*user tried to press = when calc was displaying result*/
-        || getDisplayTextFloat() == null) /*there was an integer parse error for the input*/
+        || getDisplayTextDouble() == null) /*there was an integer parse error for the input*/
         {
             return;
         }
@@ -51,13 +51,13 @@ public class CalculatorFunction
 
         if(firstNum == null)
         {
-            firstNum = getDisplayTextFloat();
+            firstNum = getDisplayTextDouble();
             InputLogger.addFirstNum(df.format(firstNum));
         }
         //There's a first number, but not second, so populate second
         else if(secondNum == null)
         {
-            secondNum = getDisplayTextFloat();
+            secondNum = getDisplayTextDouble();
             InputLogger.addSecondNum(df.format(secondNum));
             hasBothNums = true;
         }
@@ -99,60 +99,74 @@ public class CalculatorFunction
     }
 
     /**
-     * Method that sets the calculator into an error state, used in very few
-     * circumstances but an important failsafe nonetheless
+     * The main calculation method that uses the class variables to execute the calculation
+     * and return the result to the wipeEvent method. Uses special Math class methods to
+     * simplify the process of throwing an exception for an integer overflow exception.
+     * Java gave us these amazing libraries for a reason!
+     * @return the calculation result
      */
-    static void error(String message) throws IOException
+    public static Double calculate(double firstNum, String lastOperation, double secondNum) throws ArithmeticException
     {
-        InputLogger.addErrorMessage(message);
-        reset();
-        clearPreviousNums();
-        setDisplayText("Error");
-        displayingResult = true;
-    }
-
-    /**
-     * Method that resets the many variables that represent the calculator state, to be
-     * called when the equals or all clear buttons are pressed
-     */
-    static void reset() throws IOException
-    {
-        firstNum = null;
-        lastOperation = null;
-        secondNum = null;
-        result = null;
-
-        InputLogger.closeLine();
-        InputLogger.newLog();
-
-        displayingResult = false;
-    }
-    /**
-     * Changes the operation mode of the calculator
-     */
-    static void changeMode(String newMode) throws IOException
-    {
-        if(newMode.equals("Integer"))
+        try
         {
-            getButton(".").setEnabled(false);
-            getButton("1/x").setEnabled(false);
+            int firstInt = 0;
+            int secondInt = 0;
+            if(mode.equals("Integer"))
+            {
+                firstInt = (int) firstNum;
+                secondInt = (int) secondNum;
+            }
+            if(lastOperation.equals("/") && mode.equals("Integer"))
+            {
+                if(secondNum == 0)
+                    throw new ArithmeticException("Division by 0");
+                return (double) Math.round(firstNum / secondNum);
+            }
+            else if(lastOperation.equals("/"))
+            {
+                if(secondNum == 0)
+                    throw new ArithmeticException("Division by 0");
+                return firstNum / secondNum;
+            }
+            if(lastOperation.equals("-") && mode.equals("Integer"))
+            {
+                return (double) Math.subtractExact(firstInt, secondInt);
+            }
+            else if(lastOperation.equals("-"))
+            {
+                return firstNum - secondNum;
+            }
+            if(lastOperation.equals("*") && mode.equals("Integer"))
+            {
+                return (double) Math.multiplyExact(firstInt, secondInt);
+            }
+            else if(lastOperation.equals("*"))
+            {
+                return firstNum * secondNum;
+            }
+            if(lastOperation.equals("+") && mode.equals("Integer"))
+            {
+                return (double) Math.addExact(firstInt, secondInt);
+            }
+            else if(lastOperation.equals("+"))
+            {
+                return firstNum + secondNum;
+            }
+            throw new ArithmeticException();
         }
-        else
+        catch(Exception e)
         {
-            getButton(".").setEnabled(true);
-            getButton("1/x").setEnabled(true);
+            showErrorMessage(e.toString());
+            error(e.toString());
+            return null;
         }
-        mode = newMode;
-        clearPreviousNums();
-        clearDisplayText();
-        reset();
     }
 
     /**
      * Method that handles the unary operations
      * @param type the type of operation
      */
-    public static Float unaryOperation(String type, Float number) throws ArithmeticException
+    public static Double unaryOperation(String type, Double number) throws ArithmeticException
     {
         //Do nothing if there is nothing to operate on
         if(number == null)
@@ -167,15 +181,15 @@ public class CalculatorFunction
                 {
                     //Cast to int first to make sure it is a valid int
                     displayingUnaryResult = true;
-                    return (float) ((int) (Math.pow(number, 2)));
+                    return (double) ((int) (Math.pow(number, 2)));
                 }
                 displayingUnaryResult = true;
-                return (float)(Math.pow(number, 2));
+                return (Math.pow(number, 2));
             }
 
             if(type.equals("sqrt"))
             {
-                float result = (float) Math.sqrt(number);
+                double result = Math.sqrt(number);
                 if(mode.equals("Integer"))
                 {
                     if(result != Math.round(result))
@@ -193,10 +207,13 @@ public class CalculatorFunction
                 return result;
             }
 
-            //For the integer calculator, I have this function disabled, because the only
-            //operand that yields an integer is 1
+            /* For the integer calculator, I have this function disabled, because the only
+            operand that yields an integer is 1 */
             if(type.equals("reciprocal"))
             {
+                if(number == 0)
+                    throw new ArithmeticException("Division by 0");
+
                 displayingUnaryResult = true;
                 return ((1 / number));
             }
@@ -208,6 +225,57 @@ public class CalculatorFunction
             return null;
         }
         return null;
+    }
+
+    /**
+     * Method that sets the calculator into an error state, used in very few
+     * circumstances but an important failsafe nonetheless
+     */
+    static void error(String message)
+    {
+        InputLogger.addOperationAndResult(lastOperation, "");
+        reset();
+        clearPreviousNums();
+        setDisplayText("Error");
+        displayingResult = true;
+    }
+
+    /**
+     * Method that resets the many variables that represent the calculator state, to be
+     * called when the equals or all clear buttons are pressed
+     */
+    static void reset()
+    {
+        firstNum = null;
+        lastOperation = null;
+        secondNum = null;
+        result = null;
+
+        InputLogger.closeLine();
+        InputLogger.newLog();
+
+        displayingResult = false;
+    }
+
+    /**
+     * Changes the operation mode of the calculator
+     */
+    public static void changeMode(String newMode)
+    {
+        if(newMode.equalsIgnoreCase("Integer"))
+        {
+            getButton(".").setEnabled(false);
+            getButton("1/x").setEnabled(false);
+        }
+        else
+        {
+            getButton(".").setEnabled(true);
+            getButton("1/x").setEnabled(true);
+        }
+        mode = newMode;
+        clearPreviousNums();
+        clearDisplayText();
+        reset();
     }
 
     /**
@@ -235,69 +303,6 @@ public class CalculatorFunction
         }
         return "";
     }
-    /**
-     * The main calculation method that uses the class variables to execute the calculation
-     * and return the result to the wipeEvent method. Uses special Math class methods to
-     * simplify the process of throwing an exception for an integer overflow exception.
-     * Java gave us these amazing libraries for a reason!
-     * @return the calculation result
-     */
-    public static Float calculate(float firstNum, String lastOperation, float secondNum) throws ArithmeticException
-    {
-        try
-        {
-            int firstInt = 0;
-            int secondInt = 0;
-            if(mode.equals("Integer"))
-            {
-                firstInt = (int) firstNum;
-                secondInt = (int) secondNum;
-            }
-            if(lastOperation.equals("/") && !mode.equals("Float"))
-            {
-                if(secondNum == 0)
-                    return null;
-                return (float) Math.round(firstNum / secondNum);
-            }
-            else if(lastOperation.equals("/"))
-            {
-                if(secondNum == 0)
-                    return null;
-                return firstNum / secondNum;
-            }
-            if(lastOperation.equals("-") && !mode.equals("Float"))
-            {
-                return (float) Math.subtractExact(firstInt, secondInt);
-            }
-            else if(lastOperation.equals("-"))
-            {
-                return firstNum - secondNum;
-            }
-            if(lastOperation.equals("*") && !mode.equals("Float"))
-            {
-                return (float) Math.multiplyExact(firstInt, secondInt);
-            }
-            else if(lastOperation.equals("*"))
-            {
-                return firstNum * secondNum;
-            }
-            if(lastOperation.equals("+") && !mode.equals("Float"))
-            {
-                return (float) Math.addExact(firstInt, secondInt);
-            }
-            else if(lastOperation.equals("+"))
-            {
-                return firstNum + secondNum;
-            }
-            return null;
-        }
-        catch(Exception e)
-        {
-
-            showErrorMessage(e.toString());
-            return null;
-        }
-    }
 
     //region Getters/Setters
     /**
@@ -307,6 +312,7 @@ public class CalculatorFunction
     {
         return displayingUnaryResult;
     }
+
     /**
      * Sets the variable that represents whether the display is showing the result of a unary calculation
      */
@@ -314,14 +320,7 @@ public class CalculatorFunction
     {
         displayingUnaryResult = false;
     }
-    /**
-     * @param newMode the new calculator mode
-     */
-    public static void setMode(String newMode) throws IOException
-    {
-        mode = newMode;
-        changeMode(newMode);
-    }
+
     /**
      * @return true if both of the number variables are non-null
      */
@@ -329,6 +328,7 @@ public class CalculatorFunction
     {
         return hasBothNums;
     }
+
     /**
      * @return true if the calculator is displaying a result from a calculation
      * rather than user-entered text
@@ -337,6 +337,7 @@ public class CalculatorFunction
     {
         return displayingResult;
     }
+
     /**
      * Sets the variable that represents whether the calculator is displaying a
      * result or not
@@ -345,6 +346,7 @@ public class CalculatorFunction
     {
         displayingResult = false;
     }
+
     /**
      * @return the current calculator mode
      */
