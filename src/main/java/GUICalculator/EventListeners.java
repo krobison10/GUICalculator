@@ -61,7 +61,6 @@ class btnACClick implements ActionListener
         clearPreviousNums();
         clearDisplayText();
         CalculatorFunction.reset();
-
     }
 }
 class btnSqrtClick implements ActionListener

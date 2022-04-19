@@ -7,20 +7,14 @@ import static GUICalculator.CalculatorMain.*;
 public class CalculatorFunction
 {
     //region Static Fields
-    private static Double firstNum = null;
-    private static String lastOperation = null;
-    private static Double secondNum = null;
-    private static Double result = null;
-
-    private static String mode = "Integer";
+    private static Double firstNum = null, secondNum = null, result = null;
+    private static String lastOperation = null, mode = "Integer";
 
     public static final DecimalFormat df = new DecimalFormat("0");
 
-    //Boolean variables representing that status of multiple things
-    private static boolean hasBothNums = false;
-    private static boolean displayingResult = false;
-    private static boolean newCalculation = true;
-    private static boolean displayingUnaryResult = false;
+    private static boolean hasBothNums = false, displayingResult = false,
+            newCalculation = true, displayingUnaryResult = false;
+
     //endregion
 
 
@@ -109,50 +103,51 @@ public class CalculatorFunction
     {
         try
         {
+            Double result = null;
             int firstInt = 0;
             int secondInt = 0;
             if(mode.equals("Integer"))
             {
                 firstInt = (int) firstNum;
                 secondInt = (int) secondNum;
+                if(lastOperation.equals("/"))
+                {
+                    if(secondNum == 0)
+                        throw new ArithmeticException("Division by 0");
+                    result = (double) Math.round(firstNum / secondNum);
+                }
+                if(lastOperation.equals("-"))
+                {
+                    result = (double) Math.subtractExact(firstInt, secondInt);
+                }
+                if(lastOperation.equals("*"))
+                {
+                    result = (double) Math.multiplyExact(firstInt, secondInt);
+                }
+                if(lastOperation.equals("+"))
+                {
+                    result = (double) Math.addExact(firstInt, secondInt);
+                }
             }
-            if(lastOperation.equals("/") && mode.equals("Integer"))
+            if(lastOperation.equals("/"))
             {
                 if(secondNum == 0)
                     throw new ArithmeticException("Division by 0");
-                return (double) Math.round(firstNum / secondNum);
+                result = firstNum / secondNum;
             }
-            else if(lastOperation.equals("/"))
+            if(lastOperation.equals("-"))
             {
-                if(secondNum == 0)
-                    throw new ArithmeticException("Division by 0");
-                return firstNum / secondNum;
+                result = firstNum - secondNum;
             }
-            if(lastOperation.equals("-") && mode.equals("Integer"))
+            if(lastOperation.equals("*"))
             {
-                return (double) Math.subtractExact(firstInt, secondInt);
+                result = firstNum * secondNum;
             }
-            else if(lastOperation.equals("-"))
+            if(lastOperation.equals("+"))
             {
-                return firstNum - secondNum;
+                result = firstNum + secondNum;
             }
-            if(lastOperation.equals("*") && mode.equals("Integer"))
-            {
-                return (double) Math.multiplyExact(firstInt, secondInt);
-            }
-            else if(lastOperation.equals("*"))
-            {
-                return firstNum * secondNum;
-            }
-            if(lastOperation.equals("+") && mode.equals("Integer"))
-            {
-                return (double) Math.addExact(firstInt, secondInt);
-            }
-            else if(lastOperation.equals("+"))
-            {
-                return firstNum + secondNum;
-            }
-            throw new ArithmeticException();
+            return result;
         }
         catch(Exception e)
         {
@@ -169,60 +164,59 @@ public class CalculatorFunction
     public static Double unaryOperation(String type, Double number) throws ArithmeticException
     {
         //Do nothing if there is nothing to operate on
-        if(number == null)
+        if(number != null)
         {
-            return null;
-        }
-        try
-        {
-            if(type.equals("xsquare"))
+            try
             {
-                if(mode.equals("Integer"))
+                if(type.equals("xsquare"))
                 {
-                    //Cast to int first to make sure it is a valid int
-                    displayingUnaryResult = true;
-                    return (double) ((int) (Math.pow(number, 2)));
-                }
-                displayingUnaryResult = true;
-                return (Math.pow(number, 2));
-            }
-
-            if(type.equals("sqrt"))
-            {
-                double result = Math.sqrt(number);
-                if(mode.equals("Integer"))
-                {
-                    if(result != Math.round(result))
+                    if(mode.equals("Integer"))
                     {
-                        showErrorMessage("Answer is not a whole number");
-                        return number;
-                    }
-                    else
-                    {
+                        //Cast to int first to make sure it is a valid int
                         displayingUnaryResult = true;
-                        return result;
+                        return (double) ((int) (Math.pow(number, 2)));
                     }
+                    displayingUnaryResult = true;
+                    return (Math.pow(number, 2));
                 }
-                displayingUnaryResult = true;
-                return result;
-            }
+
+                if(type.equals("sqrt"))
+                {
+                    double result = Math.sqrt(number);
+                    if(mode.equals("Integer"))
+                    {
+                        if(result != Math.round(result))
+                        {
+                            showErrorMessage("Answer is not a whole number");
+                            return number;
+                        }
+                        else
+                        {
+                            displayingUnaryResult = true;
+                            return result;
+                        }
+                    }
+                    displayingUnaryResult = true;
+                    return result;
+                }
 
             /* For the integer calculator, I have this function disabled, because the only
             operand that yields an integer is 1 */
-            if(type.equals("reciprocal"))
-            {
-                if(number == 0)
-                    throw new ArithmeticException("Division by 0");
+                if(type.equals("reciprocal"))
+                {
+                    if(number == 0)
+                        throw new ArithmeticException("Division by 0");
 
-                displayingUnaryResult = true;
-                return ((1 / number));
+                    displayingUnaryResult = true;
+                    return ((1 / number));
+                }
             }
-        }
-        catch(Exception e)
-        {
-            showErrorMessage(e.toString());
-            displayingUnaryResult = false;
-            return null;
+            catch(Exception e)
+            {
+                showErrorMessage(e.toString());
+                displayingUnaryResult = false;
+                return null;
+            }
         }
         return null;
     }

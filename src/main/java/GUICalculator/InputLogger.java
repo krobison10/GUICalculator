@@ -44,7 +44,6 @@ public class InputLogger
     }
     static void addErrorMessage(String message)
     {
-
         errors.add(message);
     }
     static void newLog()
@@ -83,27 +82,4 @@ public class InputLogger
     {
         System.out.println("Log file created: " + file.getName() + "\n" + totalContents);
     }
-    /*
-     * Deprecated method. Of course, reading from the file is the file is the correct way to
-     * get the contents, but with the structure of my program currently, this method
-     * of writing to the file each time doesn't allow the JUnit testing to work, but
-     * I left the method here, so you can see that I at least knew of the proper way
-     * to do it, and save myself a lot of refactoring for little gain to make it work
-     *
-     * @return the contents of the log file
-     * @throws FileNotFoundException if there is trouble accessing the file
-     *
-    private static String getFileContents() throws FileNotFoundException
-    {
-        StringBuilder entireLogString = new StringBuilder();
-        Scanner scanner = new Scanner(file);
-
-        while(scanner.hasNext())
-        {
-            entireLogString.append(scanner.nextLine().trim()).append("\n");
-        }
-        scanner.close();
-
-        return entireLogString.toString();
-    }*/
 }
